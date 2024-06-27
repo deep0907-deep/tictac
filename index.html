@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            --background-color: #ffffff;
+            /* Light mode background color */
+            --cell-background-color: #f9f9f9;
+            /* Light mode cell color */
+            --text-color: #000000;
+            /* Light mode text color */
+            --hover-background-color: #d3d3d3;
+            /* Light mode hover color */
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                --background-color: #000000;
+                /* Dark mode background color */
+                --cell-background-color: #333333;
+                /* Dark mode cell color */
+                --text-color: #ffffff;
+                /* Dark mode text color */
+                --hover-background-color: #555555;
+                /* Dark mode hover color */
+            }
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 4px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--text-color);
+            font-size: 48px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--cell-background-color);
+            color: var(--text-color);
+        }
+
+        .cell:hover {
+            background-color: var(--hover-background-color);
+        }
+
+        #message {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #reset {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #000000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.4s ease;
+        }
+
+        #reset:hover {
+            background-color: #464646;
+        }
+
+        #share {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.4s ease;
+        }
+
+        #share:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎮 Tic-Tac-Toe 🎮</h1>
+    <div id="board"></div>
+    <div id="message">❌ It's your turn!</div>
+    <button id="reset">🔄 Reset Game</button>
+    <button id="share">🔗 Share Game</button>
+
+    <script>
+        let currentPlayer = '❌';
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let gameWon = false;
+        const winningCombos = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        const boardElement = document.getElementById('board');
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.dataset.index = i;
+            cell.addEventListener('click', handleCellClick);
+            boardElement.appendChild(cell);
+        }
+
+        const resetButton = document.getElementById('reset');
+        resetButton.addEventListener('click', resetGame);
+
+        const shareButton = document.getElementById('share');
+        shareButton.addEventListener('click', shareGame);
+
+        function handleCellClick(event) {
+            if (!gameWon) {
+                const cellIndex = event.target.dataset.index;
+                if (board[cellIndex] === '') {
+                    board[cellIndex] = currentPlayer;
+                    event.target.textContent = currentPlayer;
+                    if (checkWinner(currentPlayer)) {
+                        gameWon = true;
+                        displayMessage(`🎉 ${currentPlayer} wins! 🎉`);
+                    } else if (board.every(cell => cell !== '')) {
+                        displayMessage("🤝 It's a draw!");
+                    } else {
+                        currentPlayer = currentPlayer === '❌' ? '⭕' : '❌';
+                        displayMessage(`${currentPlayer} It's your turn!`);
+                    }
+                }
+            }
+        }
+
+        function checkWinner(player) {
+            return winningCombos.some(combo => {
+                return combo.every(index => board[index] === player);
+            });
+        }
+
+        function displayMessage(message) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = message;
+        }
+
+        function resetGame() {
+            board.fill('');
+            currentPlayer = '❌';
+            gameWon = false;
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.textContent = '';
+            });
+            displayMessage(`${currentPlayer} It's your turn!`);
+        }
+
+        function shareGame() {
+            const winnerMessage = document.getElementById('message').textContent;
+            const encodedMessage = encodeURIComponent(winnerMessage);
+            const shareUrl = `${window.location.origin}${window.location.pathname}?message=${encodedMessage}`;
+            prompt("Copy this URL to share the game result:", shareUrl);
+        }
+    </script>
+</body>
+
+</html>
